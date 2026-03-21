@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>FiDa Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="bg-orb orb-1"></div>
+    <div class="bg-orb orb-2"></div>
+
+    <main class="container py-4 py-md-5">
+      <header class="top-nav panel p-3 mb-4 d-flex flex-wrap justify-content-between align-items-center gap-3">
+        <div>
+          <p class="badge-chip mb-2">FiDa</p>
+          <p class="mb-0 small text-body-secondary">Backend: <span id="backendBadge">-</span></p>
+        </div>
+        <div class="d-flex gap-2 align-items-center">
+          <button id="refreshBtn" class="btn btn-soft-brand">Refresh</button>
+          <button id="logoutBtn" class="btn btn-outline-secondary">Logout</button>
+        </div>
+      </header>
+
+      <section class="hero p-4 p-md-5 mb-4">
+        <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 align-items-lg-center">
+          <div>
+            <h1 class="mb-2">Financial Clarity, One Dashboard</h1>
+            <p class="subtitle mb-0">
+              Your authenticated dashboard view for income, expenses, and spending patterns.
+            </p>
+          </div>
+          <div class="d-flex gap-2 align-items-center">
+            <span id="connectionDot" class="connection-dot offline"></span>
+            <span id="connectionText" class="small text-uppercase">Disconnected</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel p-3 p-md-4 mb-4">
+        <p id="authMessage" class="status-message mb-0">Checking session...</p>
+        <p id="statusMessage" class="status-message mt-2 mb-0">Preparing dashboard...</p>
+      </section>
+
+      <section class="row g-3 mb-4" id="cardsSection">
+        <div class="col-6 col-xl-3">
+          <article class="metric-card p-3">
+            <p class="metric-label mb-1">Income (Month)</p>
+            <h3 id="incomeValue" class="metric-value mb-0">$0.00</h3>
+          </article>
+        </div>
+        <div class="col-6 col-xl-3">
+          <article class="metric-card p-3">
+            <p class="metric-label mb-1">Expense (Month)</p>
+            <h3 id="expenseValue" class="metric-value mb-0">$0.00</h3>
+          </article>
+        </div>
+        <div class="col-6 col-xl-3">
+          <article class="metric-card p-3">
+            <p class="metric-label mb-1">Net Cashflow</p>
+            <h3 id="netValue" class="metric-value mb-0">$0.00</h3>
+          </article>
+        </div>
+        <div class="col-6 col-xl-3">
+          <article class="metric-card p-3">
+            <p class="metric-label mb-1">Transactions</p>
+            <h3 id="txnCountValue" class="metric-value mb-0">0</h3>
+          </article>
+        </div>
+      </section>
+
+      <section class="row g-3">
+        <div class="col-12 col-xl-5">
+          <article class="panel p-3 p-md-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h2 class="h5 mb-0">Spending by Category</h2>
+              <small class="text-body-secondary">Current month</small>
+            </div>
+            <div id="categoryBars" class="d-flex flex-column gap-2"></div>
+          </article>
+        </div>
+        <div class="col-12 col-xl-7">
+          <article class="panel p-3 p-md-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h2 class="h5 mb-0">Recent Transactions</h2>
+              <small id="profileBadge" class="text-body-secondary"></small>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-borderless align-middle mb-0">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Category</th>
+                    <th>Type</th>
+                    <th class="text-end">Amount</th>
+                  </tr>
+                </thead>
+                <tbody id="transactionsBody">
+                  <tr>
+                    <td colspan="4" class="text-center text-body-secondary py-4">
+                      Connect to load transactions
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="fida-common.js"></script>
+    <script src="dashboard.js"></script>
+  </body>
+</html>
