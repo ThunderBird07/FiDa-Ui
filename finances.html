@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>FiDa Finances</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="dashboard-page" data-theme="midnight">
+    <main class="dashboard-shell">
+      <header class="app-topbar">
+        <div class="brand">FiDa</div>
+        <div class="top-controls">
+          <nav class="top-menu-container" aria-label="Primary">
+            <a class="top-menu-link" href="index.html">Dashboard</a>
+            <a class="top-menu-link active" href="finances.html">Finances</a>
+            <a class="top-menu-link" href="goals.html">Planning</a>
+            <a class="top-menu-link" href="settings.html">Me</a>
+          </nav>
+          <select id="globalThemeSelect" class="global-theme-select" aria-label="Theme">
+            <option value="light">Light</option>
+            <option value="midnight">Midnight</option>
+            <option value="slate">Slate</option>
+            <option value="monsoon">Monsoon</option>
+            <option value="terracotta">Terracotta</option>
+          </select>
+          <button id="logoutBtn" class="icon-btn power-btn" type="button" aria-label="Logout" title="Logout"></button>
+        </div>
+      </header>
+
+      <section class="welcome-strip">
+        <div class="avatar-badge">$</div>
+        <div>
+          <h1>Finances</h1>
+          <p id="financesSubtitle" class="muted-text">Manage income, expenses, and invoices.</p>
+        </div>
+      </section>
+
+      <section class="dashboard-grid-ref finance-grid">
+        <article class="card">
+          <div class="card-head">
+            <h2>Financial Actions</h2>
+            <span class="dot-menu">•••</span>
+          </div>
+          <div class="quick-actions-grid">
+            <button class="ghost-btn action-btn" data-action="expense">Add Expense</button>
+            <button class="ghost-btn action-btn" data-action="income">Add Income</button>
+            <button class="ghost-btn action-btn" data-action="invoice">Create Invoice</button>
+            <button class="ghost-btn action-btn" data-action="transfer">Transfer Funds</button>
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="card-head">
+            <h2>Quick Add Transaction</h2>
+            <span class="dot-menu">•••</span>
+          </div>
+          <form id="quickTxnForm" class="inline-form" novalidate>
+            <div class="inline-form-row">
+              <select id="quickTxnType" class="form-control" required>
+                <option value="expense">Expense</option>
+                <option value="income">Income</option>
+              </select>
+              <input id="quickTxnAmount" class="form-control" type="number" step="0.01" min="0.01" placeholder="Amount" required />
+            </div>
+            <div class="inline-form-row">
+              <select id="quickTxnAccount" class="form-control" required>
+                <option value="">Account</option>
+              </select>
+              <select id="quickTxnCategory" class="form-control">
+                <option value="">Category (optional)</option>
+              </select>
+            </div>
+            <input id="quickTxnNote" class="form-control" type="text" maxlength="255" placeholder="Note (optional)" />
+            <button id="quickTxnSubmit" type="submit" class="ghost-btn">Save</button>
+          </form>
+          <p id="quickAccountHint" class="muted-text"></p>
+          <p id="quickTxnStatus" class="muted-text status-line">Add a transaction securely with client-side encryption.</p>
+        </article>
+
+        <article class="card finance-transactions-card">
+          <div class="card-head">
+            <h2>Transactions</h2>
+            <span class="dot-menu">•••</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Account</th>
+                  <th>Category</th>
+                  <th>Type</th>
+                  <th class="text-end">Amount</th>
+                </tr>
+              </thead>
+              <tbody id="transactionsBody">
+                <tr>
+                  <td colspan="5" class="muted-text">No transactions found.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="fida-common.js"></script>
+    <script src="finances.js"></script>
+  </body>
+</html>

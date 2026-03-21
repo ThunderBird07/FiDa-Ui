@@ -1,7 +1,11 @@
 (function bootstrapRegisterPage() {
+  document.body.setAttribute("data-theme", "light");
+
   const elements = {
     form: document.getElementById("registerForm"),
+    nameInput: document.getElementById("nameInput"),
     emailInput: document.getElementById("emailInput"),
+    countryInput: document.getElementById("countryInput"),
     passwordInput: document.getElementById("passwordInput"),
     confirmPasswordInput: document.getElementById("confirmPasswordInput"),
     registerBtn: document.getElementById("registerBtn"),
@@ -29,14 +33,37 @@
     }
   }
 
+  async function setProfileDetails(token, fullName, country) {
+    try {
+      const baseUrl = window.FiDaCommon.DEFAULTS.baseUrl;
+      const url = `http://${baseUrl}/v1/profile`;
+      const response = await fetch(url, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ full_name: fullName, country })
+      });
+
+      if (!response.ok) {
+        console.warn("Failed to save profile details, but signup succeeded.");
+      }
+    } catch (error) {
+      console.warn("Could not save profile details:", error.message);
+    }
+  }
+
   async function handleSubmit(event) {
     event.preventDefault();
 
+    const fullName = elements.nameInput.value.trim();
     const email = elements.emailInput.value.trim();
+    const country = String(elements.countryInput?.value || "").trim().toUpperCase();
     const password = elements.passwordInput.value;
     const confirmPassword = elements.confirmPasswordInput.value;
 
-    if (!email || !password || !confirmPassword) {
+    if (!fullName || !email || !country || !password || !confirmPassword) {
       setStatus("All fields are required.", true);
       return;
     }
@@ -67,6 +94,8 @@
 
       const token = data?.session?.access_token;
       if (token) {
+        await window.FiDaCommon.initializeEncryptionForSession(token, password);
+        await setProfileDetails(token, fullName, country);
         setStatus("Registration successful. Redirecting to dashboard...", false);
         window.location.replace("index.html");
         return;

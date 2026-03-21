@@ -1,4 +1,6 @@
 (function bootstrapLoginPage() {
+  document.body.setAttribute("data-theme", "light");
+
   const elements = {
     form: document.getElementById("loginForm"),
     emailInput: document.getElementById("emailInput"),
@@ -63,6 +65,11 @@
 
       window.FiDaCommon.setEmail(email);
       window.FiDaCommon.setBaseUrl(window.FiDaCommon.DEFAULTS.baseUrl);
+      
+      // Store token in localStorage for later use
+      localStorage.setItem("fida.accessToken", token);
+      await window.FiDaCommon.initializeEncryptionForSession(token, password);
+
       setStatus("Login successful. Redirecting...", false);
       window.location.replace("index.html");
     } catch (error) {

@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>FiDa Me</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="dashboard-page" data-theme="midnight">
+    <main class="settings-shell">
+      <header class="app-topbar">
+        <div class="brand">FiDa</div>
+        <div class="top-controls">
+          <nav class="top-menu-container" aria-label="Primary">
+            <a class="top-menu-link" href="index.html">Dashboard</a>
+            <a class="top-menu-link" href="finances.html">Finances</a>
+            <a class="top-menu-link" href="goals.html">Planning</a>
+            <a class="top-menu-link active" href="settings.html">Me</a>
+          </nav>
+          <select id="globalThemeSelect" class="global-theme-select" aria-label="Theme">
+            <option value="light">Light</option>
+            <option value="midnight">Midnight</option>
+            <option value="slate">Slate</option>
+            <option value="monsoon">Monsoon</option>
+            <option value="terracotta">Terracotta</option>
+          </select>
+          <button id="logoutBtn" class="icon-btn power-btn" type="button" aria-label="Logout" title="Logout"></button>
+        </div>
+      </header>
+
+      <section class="welcome-strip">
+        <div class="avatar-badge">M</div>
+        <div>
+          <h1>Me</h1>
+          <p class="muted-text">Manage your session, preferences, and account security.</p>
+        </div>
+      </section>
+
+      <section class="settings-panel">
+        <div class="settings-group settings-card settings-card-compact">
+          <div class="settings-card-header">
+            <p class="settings-title">Profile</p>
+            <p class="settings-subtitle">Update your personal information</p>
+          </div>
+          <form id="profileForm" class="inline-form" novalidate>
+            <input id="fullNameInput" class="form-control" type="text" autocomplete="name" placeholder="Full name" maxlength="100" />
+            <input id="emailInput" class="form-control" type="email" autocomplete="email" placeholder="Email" required />
+            <select id="countryInput" class="form-control" required>
+              <option value="" disabled>Select country</option>
+              <option value="AU">Australia</option>
+              <option value="CA">Canada</option>
+              <option value="DE">Germany</option>
+              <option value="IN">India</option>
+              <option value="JP">Japan</option>
+              <option value="LK">Sri Lanka</option>
+              <option value="SG">Singapore</option>
+              <option value="AE">United Arab Emirates</option>
+              <option value="GB">United Kingdom</option>
+              <option value="US">United States</option>
+            </select>
+            <button id="updateProfileBtn" type="submit" class="ghost-btn">Update Profile</button>
+          </form>
+        </div>
+
+        <div class="settings-group settings-card settings-card-compact">
+          <div class="settings-card-header">
+            <p class="settings-title">Change Password</p>
+            <p class="settings-subtitle">Secure your account with a new password</p>
+          </div>
+          <form id="passwordForm" class="inline-form" novalidate>
+            <input id="newPasswordInput" class="form-control" type="password" autocomplete="new-password" placeholder="New password" required />
+            <input id="confirmNewPasswordInput" class="form-control" type="password" autocomplete="new-password" placeholder="Confirm new password" required />
+            <button id="changePasswordBtn" type="submit" class="ghost-btn">Update Password</button>
+          </form>
+        </div>
+
+        <div class="settings-group settings-card settings-card-wide">
+          <div class="settings-card-head-inline">
+            <div class="settings-card-header">
+              <p class="settings-title">Account Setup</p>
+              <p class="settings-subtitle">Create and manage your financial accounts.</p>
+            </div>
+            <button id="openAccountModalBtn" type="button" class="icon-btn add-btn" aria-label="Add account" title="Add account">+</button>
+          </div>
+
+          <div class="table-wrap settings-account-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Account</th>
+                  <th>Type</th>
+                  <th class="text-end">Balance</th>
+                  <th class="text-end">Action</th>
+                </tr>
+              </thead>
+              <tbody id="settingsAccountsBody">
+                <tr>
+                  <td colspan="4" class="muted-text">No accounts yet. Add your first account above.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+
+      <div id="accountModalBackdrop" class="modal-backdrop" hidden>
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="accountModalTitle">
+          <div class="modal-head">
+            <h2 id="accountModalTitle">Add Account</h2>
+            <button id="closeAccountModalBtn" type="button" class="icon-btn modal-close-btn" aria-label="Close">x</button>
+          </div>
+          <p class="muted-text">Enter account details to add a new account.</p>
+
+          <form id="accountSetupForm" class="inline-form" novalidate>
+            <div class="inline-form-row">
+              <input id="accountNameInput" class="form-control" type="text" maxlength="100" placeholder="Account name" required />
+              <select id="accountTypeInput" class="form-control" required>
+                <option value="bank">Bank</option>
+                <option value="cash">Cash</option>
+                <option value="savings">Savings</option>
+                <option value="credit">Credit</option>
+                <option value="investment">Investment</option>
+              </select>
+            </div>
+            <div class="inline-form-row">
+              <input id="accountBalanceInput" class="form-control" type="number" step="0.01" placeholder="Opening balance" required />
+              <input id="accountCurrencyInput" class="form-control" type="text" maxlength="3" placeholder="Currency (e.g. INR)" required />
+            </div>
+            <div class="modal-actions">
+              <button id="addAccountBtn" type="submit" class="ghost-btn">Add Account</button>
+              <button id="cancelAccountModalBtn" type="button" class="ghost-btn">Cancel</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div id="deleteAccountModalBackdrop" class="modal-backdrop" hidden>
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="deleteAccountModalTitle">
+          <div class="modal-head">
+            <h2 id="deleteAccountModalTitle">Delete Account</h2>
+            <button id="closeDeleteAccountModalBtn" type="button" class="icon-btn modal-close-btn" aria-label="Close">x</button>
+          </div>
+          <p id="deleteAccountWarningText" class="muted-text">
+            Heads up: deleting this account will remove it from active views.
+          </p>
+          <label class="switch-row" for="deleteAccountWithTransactions">
+            <input id="deleteAccountWithTransactions" type="checkbox" />
+            <span>Also delete all transactions tied to this account (permanent).</span>
+          </label>
+          <div class="modal-actions">
+            <button id="confirmDeleteAccountBtn" type="button" class="ghost-btn danger-btn">Delete Account</button>
+            <button id="cancelDeleteAccountModalBtn" type="button" class="ghost-btn">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="fida-common.js"></script>
+    <script src="settings.js"></script>
+  </body>
+</html>

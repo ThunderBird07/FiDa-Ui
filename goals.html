@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>FiDa Planning</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="dashboard-page" data-theme="midnight">
+    <main class="dashboard-shell">
+      <header class="app-topbar">
+        <div class="brand">FiDa</div>
+        <div class="top-controls">
+          <nav class="top-menu-container" aria-label="Primary">
+            <a class="top-menu-link" href="index.html">Dashboard</a>
+            <a class="top-menu-link" href="finances.html">Finances</a>
+            <a class="top-menu-link active" href="goals.html">Planning</a>
+            <a class="top-menu-link" href="settings.html">Me</a>
+          </nav>
+          <select id="globalThemeSelect" class="global-theme-select" aria-label="Theme">
+            <option value="light">Light</option>
+            <option value="midnight">Midnight</option>
+            <option value="slate">Slate</option>
+            <option value="monsoon">Monsoon</option>
+            <option value="terracotta">Terracotta</option>
+          </select>
+          <button id="logoutBtn" class="icon-btn power-btn" type="button" aria-label="Logout" title="Logout"></button>
+        </div>
+      </header>
+
+      <section class="welcome-strip">
+        <div class="avatar-badge">G</div>
+        <div>
+          <h1>Planning</h1>
+          <p class="muted-text">Plan upcoming bills and key money commitments.</p>
+        </div>
+      </section>
+
+      <section class="dashboard-grid-ref finance-grid">
+        <article class="card planning-list-card">
+          <div class="card-head">
+            <h2>Goal Setup</h2>
+            <span class="dot-menu">•••</span>
+          </div>
+          <p class="card-note">Define savings and milestone goals with target amount and timeline.</p>
+          <form id="goalForm" class="inline-form" novalidate>
+            <input id="goalTitleInput" class="form-control" type="text" placeholder="Goal title (e.g. Emergency Fund)" maxlength="120" required />
+            <div class="inline-form-row">
+              <input id="goalAmountInput" class="form-control" type="number" min="0" step="0.01" placeholder="Target amount" required />
+              <input id="goalDateInput" class="form-control" type="date" required />
+            </div>
+            <select id="goalStatusInput" class="form-control">
+              <option value="planned">Planned</option>
+              <option value="in_progress">In Progress</option>
+              <option value="on_hold">On Hold</option>
+            </select>
+            <button id="addGoalBtn" type="submit" class="ghost-btn">Add Goal</button>
+          </form>
+        </article>
+
+        <article class="card">
+          <div class="card-head">
+            <h2>Bill Setup</h2>
+            <span class="dot-menu">•••</span>
+          </div>
+          <p class="card-note">Add recurring or one-time bills so upcoming due amounts are always visible.</p>
+          <form id="billForm" class="inline-form" novalidate>
+            <input id="billNameInput" class="form-control" type="text" placeholder="Bill name (e.g. Rent)" maxlength="100" required />
+            <div class="inline-form-row">
+              <input id="billAmountInput" class="form-control" type="number" min="0" step="0.01" placeholder="Amount" required />
+              <input id="billDueDateInput" class="form-control" type="date" required />
+            </div>
+            <select id="billFrequencyInput" class="form-control">
+              <option value="monthly">Monthly</option>
+              <option value="yearly">Yearly</option>
+              <option value="one_time">One-time</option>
+            </select>
+            <button id="addBillBtn" type="submit" class="ghost-btn">Add Bill</button>
+          </form>
+        </article>
+
+        <article class="card">
+          <div class="card-head">
+            <h2>Active Goals</h2>
+            <span class="dot-menu">•••</span>
+          </div>
+          <div id="planningGoalsList" class="account-list planning-scroll-list"></div>
+        </article>
+
+        <article class="card planning-list-card">
+          <div class="card-head">
+            <h2>Upcoming Bills</h2>
+            <span class="dot-menu">•••</span>
+          </div>
+          <div id="upcomingBillsList" class="account-list planning-scroll-list"></div>
+        </article>
+      </section>
+
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="fida-common.js"></script>
+    <script src="goals.js"></script>
+  </body>
+</html>
