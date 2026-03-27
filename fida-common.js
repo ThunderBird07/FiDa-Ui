@@ -429,9 +429,11 @@
         .map((item) => ({
           id: String(item.id || crypto.randomUUID()),
           name: String(item.name || "Untitled bill"),
-          amount: Number(item.amount || 0),
           due_date: String(item.due_date || ""),
-          frequency: String(item.frequency || "monthly")
+          amount_type: String(item.amount_type || (Number(item.amount || 0) > 0 ? "fixed" : "tentative")),
+          frequency: String(item.frequency || "monthly"),
+          custom_interval: Number(item.custom_interval || 0),
+          custom_unit: String(item.custom_unit || "month")
         }))
         .sort((a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime());
     } catch {
@@ -474,6 +476,230 @@
     return getPlanningGoals();
   }
 
+  function parseBillDate(value) {
+    const parts = String(value || "").split("-");
+    if (parts.length !== 3) {
+      return null;
+    }
+
+    const year = Number(parts[0]);
+    const month = Number(parts[1]);
+    const day = Number(parts[2]);
+    if (!Number.isInteger(year) || !Number.isInteger(month) || !Number.isInteger(day)) {
+      return null;
+    }
+
+    const date = new Date(year, month - 1, day);
+    if (
+      Number.isNaN(date.getTime()) ||
+      date.getFullYear() !== year ||
+      date.getMonth() !== month - 1 ||
+      date.getDate() !== day
+    ) {
+      return null;
+    }
+
+    date.setHours(0, 0, 0, 0);
+    return date;
+  }
+
+  function toBillIsoDate(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }
+
+  function addMonthsClamped(baseDate, monthsToAdd) {
+    const originalDay = baseDate.getDate();
+    const result = new Date(baseDate.getFullYear(), baseDate.getMonth() + monthsToAdd, 1);
+    const lastDay = new Date(result.getFullYear(), result.getMonth() + 1, 0).getDate();
+    result.setDate(Math.min(originalDay, lastDay));
+    result.setHours(0, 0, 0, 0);
+    return result;
+  }
+
+  function addYearsClamped(baseDate, yearsToAdd) {
+    return addMonthsClamped(baseDate, yearsToAdd * 12);
+  }
+
+  function getBillIntervalConfig(bill) {
+    if (!bill || bill.frequency === "one_time") {
+      return null;
+    }
+
+    if (bill.frequency === "custom") {
+      return {
+        interval: Math.max(1, Number(bill.custom_interval || 1)),
+        unit: ["week", "month", "year"].includes(String(bill.custom_unit || ""))
+          ? String(bill.custom_unit)
+          : "month"
+      };
+    }
+
+    const map = {
+      monthly: { interval: 1, unit: "month" },
+      bi_monthly: { interval: 2, unit: "month" },
+      quarterly: { interval: 3, unit: "month" },
+      half_yearly: { interval: 6, unit: "month" },
+      yearly: { interval: 1, unit: "year" }
+    };
+    return map[String(bill.frequency || "")] || { interval: 1, unit: "month" };
+  }
+
+  function addInterval(baseDate, config) {
+    if (config.unit === "week") {
+      const result = new Date(baseDate);
+      result.setDate(result.getDate() + (config.interval * 7));
+      result.setHours(0, 0, 0, 0);
+      return result;
+    }
+    if (config.unit === "year") {
+      return addYearsClamped(baseDate, config.interval);
+    }
+    return addMonthsClamped(baseDate, config.interval);
+  }
+
+  function getBillCycleDateForMonth(bill, year, monthIndex) {
+    const anchor = parseBillDate(bill?.due_date);
+    if (!anchor) {
+      return null;
+    }
+
+    if (bill?.frequency === "one_time") {
+      return anchor.getFullYear() === year && anchor.getMonth() === monthIndex ? anchor : null;
+    }
+
+    const config = getBillIntervalConfig(bill);
+    if (!config) {
+      return null;
+    }
+
+    let cursor = new Date(anchor);
+    let guard = 0;
+    const targetMarker = year * 12 + monthIndex;
+    while ((cursor.getFullYear() * 12 + cursor.getMonth()) < targetMarker && guard < 5000) {
+      cursor = addInterval(cursor, config);
+      guard += 1;
+    }
+
+    if (cursor.getFullYear() === year && cursor.getMonth() === monthIndex) {
+      return cursor;
+    }
+    return null;
+  }
+
+  function getBillNextDueOnOrAfter(bill, referenceDate) {
+    const anchor = parseBillDate(bill?.due_date);
+    if (!anchor) {
+      return null;
+    }
+
+    const baseline = new Date(referenceDate || new Date());
+    baseline.setHours(0, 0, 0, 0);
+
+    if (bill?.frequency === "one_time") {
+      return anchor;
+    }
+
+    const config = getBillIntervalConfig(bill);
+    if (!config) {
+      return anchor;
+    }
+
+    let cursor = new Date(anchor);
+    let guard = 0;
+    while (cursor < baseline && guard < 5000) {
+      cursor = addInterval(cursor, config);
+      guard += 1;
+    }
+    return cursor;
+  }
+
+  function getBillCycleKey(billId, dueIsoDate) {
+    return `${String(billId || "")}|${String(dueIsoDate || "")}`;
+  }
+
+  function getCompletedBillCycleKeys(transactions) {
+    const keys = new Set();
+    for (const txn of Array.isArray(transactions) ? transactions : []) {
+      if (String(txn?.type || "").toLowerCase() !== "expense") {
+        continue;
+      }
+      const billId = String(txn?.linked_bill_id || "").trim();
+      const cycleKey = String(txn?.linked_bill_cycle_key || "").trim();
+      if (!billId || !cycleKey) {
+        continue;
+      }
+      keys.add(getBillCycleKey(billId, cycleKey));
+    }
+    return keys;
+  }
+
+  function getBillProgressStatusForDate(bill, transactions, referenceDate) {
+    const now = new Date(referenceDate || new Date());
+    now.setHours(0, 0, 0, 0);
+
+    const cycleDate = getBillCycleDateForMonth(bill, now.getFullYear(), now.getMonth());
+    if (!cycleDate) {
+      const nextDue = getBillNextDueOnOrAfter(bill, now);
+      return {
+        isDueThisMonth: false,
+        dueDateIso: nextDue ? toBillIsoDate(nextDue) : "",
+        status: "upcoming",
+        cycleKey: nextDue ? toBillIsoDate(nextDue) : ""
+      };
+    }
+
+    const dueIso = toBillIsoDate(cycleDate);
+    const key = getBillCycleKey(bill?.id, dueIso);
+    const completed = getCompletedBillCycleKeys(transactions).has(key);
+
+    if (completed) {
+      return {
+        isDueThisMonth: true,
+        dueDateIso: dueIso,
+        status: "completed",
+        cycleKey: dueIso
+      };
+    }
+
+    return {
+      isDueThisMonth: true,
+      dueDateIso: dueIso,
+      status: cycleDate < now ? "past_due" : "upcoming",
+      cycleKey: dueIso
+    };
+  }
+
+  function getBillsDueForMonth(bills, transactions, referenceDate) {
+    const now = new Date(referenceDate || new Date());
+    now.setHours(0, 0, 0, 0);
+
+    const rows = [];
+    for (const bill of Array.isArray(bills) ? bills : []) {
+      const progress = getBillProgressStatusForDate(bill, transactions, now);
+      if (!progress.isDueThisMonth) {
+        continue;
+      }
+      rows.push({
+        bill,
+        dueDateIso: progress.dueDateIso,
+        status: progress.status,
+        cycleKey: progress.cycleKey
+      });
+    }
+
+    rows.sort((a, b) => {
+      if (a.dueDateIso === b.dueDateIso) {
+        return String(a.bill?.name || "").localeCompare(String(b.bill?.name || ""));
+      }
+      return a.dueDateIso < b.dueDateIso ? -1 : 1;
+    });
+
+    return rows;
+  }
+
   window.FiDaCommon = {
     STORAGE_KEYS,
     DEFAULTS,
@@ -490,6 +716,14 @@
     saveUpcomingBills,
     getPlanningGoals,
     savePlanningGoals,
+    parseBillDate,
+    toBillIsoDate,
+    getBillCycleDateForMonth,
+    getBillNextDueOnOrAfter,
+    getBillCycleKey,
+    getCompletedBillCycleKeys,
+    getBillProgressStatusForDate,
+    getBillsDueForMonth,
     getSupabaseClient,
     getSessionToken,
     getRequiredSessionToken,

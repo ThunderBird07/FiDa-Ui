@@ -1,5 +1,6 @@
 (function bootstrapDashboardPage() {
   const settings = window.FiDaCommon.getDashboardSettings();
+  let currentUsageMessage = "";
 
   const elements = {
     dashboardGrid: document.getElementById("dashboardGrid"),
@@ -138,27 +139,34 @@
     elements.txnCountValue.textContent = String(count);
 
     const usagePercent = income > 0 ? Math.round((expense / income) * 100) : 0;
-    const usageMessage =
+    currentUsageMessage =
       income > 0
         ? `Current month uses ${usagePercent}% of income as spend.`
         : "Add income and expense records to estimate budget utilization.";
 
     const bills = window.FiDaCommon.getUpcomingBills();
-    if (!bills.length) {
-      elements.budgetUsage.innerHTML = `<p class=\"card-note\">${escapeHtml(usageMessage)}</p><p class=\"muted-text\">No upcoming bills configured.</p>`;
+    const dueThisMonth = window.FiDaCommon.getBillsDueForMonth(bills, transactions, new Date());
+    
+    // Filter out completed bills
+    const activeUpcomingBills = dueThisMonth.filter((item) => item.status !== "completed");
+
+    if (!activeUpcomingBills.length) {
+      elements.budgetUsage.innerHTML = `<p class=\"muted-text\">No bills due this month.</p>`;
       return;
     }
 
-    const upcomingRows = bills
+    const upcomingRows = activeUpcomingBills
       .slice(0, 4)
-      .map((bill) => {
-        const amount = moneyFormatter(Number(bill.amount || 0));
-        const dueDate = formatDueDate(bill.due_date);
-        return `<div class=\"account-row\"><span>${escapeHtml(bill.name)} <small class=\"muted-text\">(${escapeHtml(dueDate)})</small></span><strong>${escapeHtml(amount)}</strong></div>`;
+      .map((item) => {
+        const dueDate = formatDueDate(item.dueDateIso || item.bill?.due_date);
+        const statusLabel = item.status === "past_due" ? "Past due" : "Upcoming";
+        const statusClass = item.status === "past_due" ? "bill-status-past-due" : "bill-status-upcoming";
+        const billName = escapeHtml(item.bill?.name || "Bill");
+        return `<div class="account-row"><span>${billName}</span><strong class="bill-status-text ${statusClass}">${escapeHtml(statusLabel)}</strong></div><p class="muted-text bill-due">Due: ${escapeHtml(dueDate)}</p>`;
       })
       .join("");
 
-    elements.budgetUsage.innerHTML = `<p class=\"card-note\">${escapeHtml(usageMessage)}</p><div class=\"account-list\">${upcomingRows}</div>`;
+    elements.budgetUsage.innerHTML = `<div class=\"account-list\">${upcomingRows}</div>`;
   }
 
   function renderCategoryBars(transactions, categoriesById, moneyFormatter) {
@@ -305,7 +313,7 @@
 
       const name = profile?.full_name || "FiDa User";
       elements.welcomeTitle.textContent = `Welcome back, ${name}`;
-      elements.profileBadge.textContent = `${settings.currency} · ${settings.locale}`;
+      elements.profileBadge.textContent = currentUsageMessage || `${settings.currency} · ${settings.locale}`;
     } catch {
       elements.profileBadge.textContent = "Unable to load dashboard right now.";
     }

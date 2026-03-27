@@ -42,57 +42,165 @@
         </div>
       </section>
 
-      <section class="dashboard-grid-ref finance-grid">
-        <article class="card">
-          <div class="card-head">
-            <h2>Financial Actions</h2>
-            <span class="dot-menu">•••</span>
-          </div>
-          <div class="quick-actions-grid">
-            <button class="ghost-btn action-btn" data-action="expense">Add Expense</button>
-            <button class="ghost-btn action-btn" data-action="income">Add Income</button>
-            <button class="ghost-btn action-btn" data-action="invoice">Create Invoice</button>
-            <button class="ghost-btn action-btn" data-action="transfer">Transfer Funds</button>
-          </div>
-        </article>
-
-        <article class="card">
-          <div class="card-head">
-            <h2>Quick Add Transaction</h2>
-            <span class="dot-menu">•••</span>
-          </div>
-          <form id="quickTxnForm" class="inline-form" novalidate>
-            <div class="inline-form-row">
-              <select id="quickTxnType" class="form-control" required>
-                <option value="expense">Expense</option>
-                <option value="income">Income</option>
-              </select>
-              <input id="quickTxnAmount" class="form-control" type="number" step="0.01" min="0.01" placeholder="Amount" required />
-            </div>
-            <div class="inline-form-row">
-              <select id="quickTxnAccount" class="form-control" required>
-                <option value="">Account</option>
-              </select>
-              <select id="quickTxnCategory" class="form-control">
-                <option value="">Category (optional)</option>
-              </select>
-            </div>
-            <input id="quickTxnNote" class="form-control" type="text" maxlength="255" placeholder="Note (optional)" />
-            <button id="quickTxnSubmit" type="submit" class="ghost-btn">Save</button>
-          </form>
-          <p id="quickAccountHint" class="muted-text"></p>
-          <p id="quickTxnStatus" class="muted-text status-line">Add a transaction securely with client-side encryption.</p>
-        </article>
-
+      <section class="dashboard-grid-ref finance-grid finance-grid-single">
         <article class="card finance-transactions-card">
           <div class="card-head">
             <h2>Transactions</h2>
-            <span class="dot-menu">•••</span>
+            <div class="txn-head-controls">
+              <div class="txn-group txn-group-account">
+                <span class="txn-pill-label">Accounts</span>
+                <div id="txnAccountDropdown" class="txn-select-dropdown">
+                  <button id="txnAccountTrigger" class="txn-select-trigger" type="button" aria-haspopup="listbox" aria-expanded="false">
+                    <span id="txnAccountValue">Select account</span>
+                    <span class="txn-select-caret" aria-hidden="true">v</span>
+                  </button>
+                  <div id="txnAccountMenu" class="txn-select-menu" hidden>
+                    <input id="txnAccountSearch" class="txn-select-search" type="text" placeholder="Search account" autocomplete="off" />
+                    <ul id="txnAccountList" class="txn-select-list" role="listbox" aria-label="Accounts"></ul>
+                  </div>
+                </div>
+                <a class="txn-go-link" href="settings.html" title="Go to Me" aria-label="Go to Me">
+                  <svg class="txn-icon-svg" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M9 5H5v14h14v-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M10 14L19 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                    <path d="M14 5h5v5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </a>
+              </div>
+              <div class="txn-group txn-group-query">
+                <span class="txn-pill-label">Tools</span>
+                <input id="txnSearchInput" class="txn-query-input" type="search" placeholder="Search transactions" autocomplete="off" />
+                <div id="txnFilterWrap" class="txn-filter-wrap">
+                  <button id="txnFilterBtn" class="ghost-btn txn-query-btn txn-query-icon-btn" type="button" title="Filters" aria-label="Filters" aria-expanded="false">
+                    <svg class="txn-icon-svg" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path d="M4 6h16l-6.5 7v5l-3 1v-6L4 6z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                    </svg>
+                  </button>
+                  <div id="txnFilterPopover" class="txn-filter-popover" hidden>
+                    <label class="txn-filter-row" for="txnFilterTypeSelect">
+                      <span>Type</span>
+                      <select id="txnFilterTypeSelect" class="txn-query-select" aria-label="Filter by type">
+                        <option value="all">All</option>
+                        <option value="income">Income</option>
+                        <option value="expense">Expense</option>
+                        <option value="transfer">Transfer</option>
+                      </select>
+                    </label>
+                    <label class="txn-filter-row" for="txnFilterAccountSelect">
+                      <span>Account</span>
+                      <select id="txnFilterAccountSelect" class="txn-query-select" aria-label="Filter by account">
+                        <option value="all">All</option>
+                      </select>
+                    </label>
+                    <label class="txn-filter-row" for="txnFilterCategorySelect">
+                      <span>Category</span>
+                      <select id="txnFilterCategorySelect" class="txn-query-select" aria-label="Filter by category">
+                        <option value="all">All</option>
+                      </select>
+                    </label>
+                    <div class="txn-filter-actions">
+                      <button id="txnFilterApplyBtn" type="button" class="ghost-btn">Apply</button>
+                      <button id="txnFilterClearBtn" type="button" class="ghost-btn">Clear</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="txn-query-control" title="Sort">
+                  <span class="txn-query-icon" aria-hidden="true" title="Sort">
+                    <svg class="txn-icon-svg" viewBox="0 0 24 24" fill="none">
+                      <path d="M8 5v14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                      <path d="M5.5 7.5L8 5l2.5 2.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M16 19V5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                      <path d="M13.5 16.5L16 19l2.5-2.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </span>
+                  <select id="txnSortSelect" class="txn-query-select" aria-label="Sort transactions" title="Sort transactions">
+                    <option value="occurred_at:desc">Date newest</option>
+                    <option value="occurred_at:asc">Date oldest</option>
+                    <option value="amount:desc">Amount high</option>
+                    <option value="amount:asc">Amount low</option>
+                  </select>
+                </div>
+                <div id="txnDateRangeWrap" class="txn-date-range-wrap">
+                  <button id="txnDateRangeBtn" class="ghost-btn txn-query-btn txn-query-icon-btn" type="button" title="Date range" aria-label="Date range" aria-expanded="false">
+                    <svg class="txn-icon-svg" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <rect x="4" y="6" width="16" height="14" rx="2" stroke="currentColor" stroke-width="1.8"/>
+                      <path d="M8 4v4M16 4v4M4 10h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                    </svg>
+                  </button>
+                  <div id="txnDateRangePopover" class="txn-date-range-popover" hidden>
+                    <label class="txn-date-row" for="txnDateFrom">
+                      <span>From</span>
+                      <input id="txnDateFrom" class="txn-date-input" type="date" />
+                    </label>
+                    <label class="txn-date-row" for="txnDateTo">
+                      <span>To</span>
+                      <input id="txnDateTo" class="txn-date-input" type="date" />
+                    </label>
+                    <div class="txn-date-actions">
+                      <button id="txnDateApplyBtn" type="button" class="ghost-btn">Apply</button>
+                      <button id="txnDateClearBtn" type="button" class="ghost-btn">Clear</button>
+                    </div>
+                  </div>
+                </div>
+                <button id="txnResetBtn" class="ghost-btn txn-query-btn txn-query-icon-btn" type="button" title="Reset" aria-label="Reset">
+                  <svg class="txn-icon-svg" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M20 11a8 8 0 1 0-2.3 5.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                    <path d="M20 5v6h-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+              </div>
+              <div class="txn-group txn-group-actions">
+                <span class="txn-pill-label">Actions</span>
+                <div class="txn-toolbar" aria-label="Transaction actions">
+                  <button id="deleteSelectedTxnsBtn" class="icon-btn txn-tool-btn txn-delete-btn" type="button" title="Delete selected transactions" aria-label="Delete selected transactions">
+                    <svg class="txn-icon-svg" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path d="M4.5 7.5h15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                      <path d="M9.5 7.5v-2h5v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                      <rect x="7.5" y="7.5" width="9" height="11" rx="1.8" stroke="currentColor" stroke-width="2"/>
+                      <path d="M10.5 10.5v5.5M13.5 10.5v5.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                  </button>
+                  <button class="icon-btn txn-tool-btn" type="button" data-action="expense" title="Add Expense" aria-label="Add Expense">
+                    <svg class="txn-icon-svg" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path d="M14 6.5c-.5-.8-1.5-1.3-2.7-1.3-1.8 0-3.3 1-3.3 2.4 0 1.5 1.2 2.2 3.3 2.7 2.1.5 3.3 1.2 3.3 2.7 0 1.4-1.5 2.4-3.3 2.4-1.2 0-2.3-.5-2.9-1.4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                      <path d="M11.3 4v15" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                      <path d="M18 17V9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                      <path d="M15.5 11.5L18 9l2.5 2.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </button>
+                  <button class="icon-btn txn-tool-btn" type="button" data-action="income" title="Add Income" aria-label="Add Income">
+                    <svg class="txn-icon-svg" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path d="M14 6.5c-.5-.8-1.5-1.3-2.7-1.3-1.8 0-3.3 1-3.3 2.4 0 1.5 1.2 2.2 3.3 2.7 2.1.5 3.3 1.2 3.3 2.7 0 1.4-1.5 2.4-3.3 2.4-1.2 0-2.3-.5-2.9-1.4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                      <path d="M11.3 4v15" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                      <path d="M18 9v8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                      <path d="M15.5 14.5L18 17l2.5-2.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </button>
+                  <button class="icon-btn txn-tool-btn" type="button" data-action="invoice" title="Create Invoice" aria-label="Create Invoice">
+                    <svg class="txn-icon-svg" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path d="M7 4h7l4 4v12H7z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                      <path d="M14 4v4h4" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                      <path d="M10 13h5M10 16h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                    </svg>
+                  </button>
+                  <button class="icon-btn txn-tool-btn" type="button" data-action="transfer" title="Transfer Funds" aria-label="Transfer Funds">
+                    <svg class="txn-icon-svg" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.9"/>
+                      <path d="M8 9.3h7.2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                      <path d="M13.3 7.5l2 1.8-2 1.8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M16 14.7H8.8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                      <path d="M10.7 16.5l-2-1.8 2-1.8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
           <div class="table-wrap">
             <table>
               <thead>
                 <tr>
+                  <th class="txn-select-col"><input id="txnSelectAll" type="checkbox" aria-label="Select all transactions" /></th>
                   <th>Date</th>
                   <th>Account</th>
                   <th>Category</th>
@@ -102,7 +210,7 @@
               </thead>
               <tbody id="transactionsBody">
                 <tr>
-                  <td colspan="5" class="muted-text">No transactions found.</td>
+                  <td colspan="6" class="muted-text">No transactions found.</td>
                 </tr>
               </tbody>
             </table>
@@ -111,6 +219,55 @@
       </section>
 
     </main>
+
+    <div id="txnModalBackdrop" class="modal-backdrop" hidden>
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="txnModalTitle">
+        <div class="modal-head">
+          <h2 id="txnModalTitle">Add Transaction</h2>
+          <button id="closeTxnModalBtn" type="button" class="icon-btn modal-close-btn" aria-label="Close">x</button>
+        </div>
+        <p id="txnModalSubtitle" class="muted-text">Enter transaction details.</p>
+
+        <form id="txnModalForm" class="inline-form" novalidate>
+          <div class="inline-form-row inline-form-row-single">
+            <select id="txnModalCategory" class="form-control">
+              <option value="">Category (optional)</option>
+            </select>
+          </div>
+          <input id="txnModalAmount" class="form-control" type="number" step="0.01" min="0.01" placeholder="Amount" required />
+          <input id="txnInvoiceRef" class="form-control" type="text" maxlength="100" placeholder="Invoice reference (optional)" />
+          <input id="txnModalNote" class="form-control" type="text" maxlength="255" placeholder="Note (optional)" />
+          <label id="txnLinkBillRow" class="switch-row txn-link-bill-row" hidden>
+            <span>Link this expense to a bill</span>
+            <input id="txnLinkBillToggle" type="checkbox" role="switch" aria-label="Link expense to bill" />
+          </label>
+          <select id="txnLinkBillSelect" class="form-control" disabled hidden>
+            <option value="">Select bill</option>
+          </select>
+          <div class="modal-actions">
+            <button id="txnModalSubmit" type="submit" class="ghost-btn">Save</button>
+            <button id="cancelTxnModalBtn" type="button" class="ghost-btn">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div id="txnDeleteModalBackdrop" class="modal-backdrop" hidden>
+      <div class="modal-card modal-card-compact" role="dialog" aria-modal="true" aria-labelledby="txnDeleteModalTitle">
+        <div class="modal-head">
+          <h2 id="txnDeleteModalTitle">Delete Transactions</h2>
+          <button id="closeTxnDeleteModalBtn" type="button" class="icon-btn modal-close-btn" aria-label="Close">x</button>
+        </div>
+        <p id="txnDeleteModalText" class="muted-text"></p>
+        <p class="txn-delete-warning">This action is permanent and cannot be undone.</p>
+        <div class="modal-actions">
+          <button id="confirmTxnDeleteBtn" type="button" class="danger-btn">Delete</button>
+          <button id="cancelTxnDeleteBtn" type="button" class="ghost-btn">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="fida-common.js"></script>
